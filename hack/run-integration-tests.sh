@@ -31,19 +31,6 @@ EOF
   exit 0
 fi
 
-install_kubectl_if_needed() {
-  if hash kubectl 2>/dev/null; then
-    echo 'using kubectl from the host system'
-  else
-    # install kubectl
-    local -r KUBECTL_VERSION='v1.14.2'
-    local -r KUBECTL_BINARY="$BINDIR/kubectl"
-    curl -fSsLo "$KUBECTL_BINARY" https://storage.googleapis.com/kubernetes-release/release/${KUBECTL_VERSION}/bin/linux/amd64/kubectl
-    chmod +x "$KUBECTL_BINARY"
-    export PATH="$BINDIR:$PATH"
-  fi
-}
-
 KREW_BINARY=$(readlink -f "${1:-$KREW_BINARY_DEFAULT}")  # needed for `kubectl krew` in tests
 if [[ ! -x "${KREW_BINARY}" ]]; then
   echo "Did not find $KREW_BINARY. You need to build krew before running the integration tests"
