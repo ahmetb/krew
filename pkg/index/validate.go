@@ -18,8 +18,6 @@ import (
 	"regexp"
 	"strings"
 
-	"sigs.k8s.io/krew/pkg/installation/semver"
-
 	"github.com/pkg/errors"
 
 	"sigs.k8s.io/krew/pkg/constants"

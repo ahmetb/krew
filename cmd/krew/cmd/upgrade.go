@@ -71,7 +71,8 @@ kubectl krew upgrade foo bar"`,
 		}
 		return nil
 	},
-	PreRunE: ensureIndexUpdated,
+	// TODO(ahmetb): re-enable before making a PR
+	// PreRunE: ensureIndexUpdated,
 }
 
 func init() {
