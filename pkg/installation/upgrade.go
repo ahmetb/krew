@@ -63,7 +63,7 @@ func Upgrade(p environment.Paths, plugin index.Plugin) error {
 }
 
 // removePluginVersionFromFS will remove a plugin directly if it not krew.
-
+//
 // Krew on Windows needs special care because active directories can't be
 // deleted. This method will unlink old krew versions and during next run clean
 // the directory.
