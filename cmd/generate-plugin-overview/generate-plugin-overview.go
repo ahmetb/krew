@@ -16,6 +16,7 @@
 package main
 
 import (
+	"encoding/json"
 	"flag"
 	"fmt"
 	"io"
@@ -60,6 +61,7 @@ var (
 
 func main() {
 	pluginsDir := flag.String("plugins-dir", "", "The directory containing the plugin manifests")
+	format := flag.String("format", "md", "Plugin list output format, one of: md, json")
 	flag.Parse()
 
 	if *pluginsDir == "" {
@@ -71,17 +73,39 @@ func main() {
 	if err != nil {
 		log.Fatal(err)
 	}
-
 	out := os.Stdout
 
-	_, _ = fmt.Fprintln(out, pageHeader)
+	switch *format {
+	case "md":
+		_, _ = fmt.Fprintln(out, pageHeader)
+		printTableHeader(out)
+		for _, p := range plugins {
+			printTableRowForPlugin(out, &p)
+		}
+		_, _ = fmt.Fprintln(out, pageFooter)
+	case "json":
+		printJSON(out, plugins)
+	default:
+		log.Fatalf("unknown -format %q", *format)
+	}
+}
 
-	printTableHeader(out)
-	for _, p := range plugins {
-		printTableRowForPlugin(out, &p)
+func printJSON(w io.Writer, plugins []index.Plugin) {
+	for i := range plugins {
+		// shorten by clearing fields
+		plugins[i].Spec.Platforms = nil
 	}
 
-	_, _ = fmt.Fprintln(out, pageFooter)
+	v := struct {
+		Data struct {
+			Plugins []index.Plugin `json:"plugins"`
+		} `json:"data"`
+	}{}
+	v.Data.Plugins = plugins
+
+	e := json.NewEncoder(w)
+	e.SetIndent("", "  ")
+	_ = e.Encode(v)
 }
 
 func printTableHeader(out io.Writer) {

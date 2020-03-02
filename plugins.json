@@ -1,0 +1,1130 @@
+{
+  "data": {
+    "plugins": [
+      {
+        "kind": "Plugin",
+        "apiVersion": "krew.googlecontainertools.github.com/v1alpha2",
+        "metadata": {
+          "name": "access-matrix",
+          "creationTimestamp": null
+        },
+        "spec": {
+          "version": "v0.4.3",
+          "shortDescription": "Show an RBAC access matrix for server resources",
+          "description": "Show an access matrix for server resources\n\nThis plugin retrieves the full list of server resources, checks access for\nthe current user with the given verbs, and prints the result as a matrix.\nThis complements the usual \"kubectl auth can-i\" command, which works for\na single resource and a single verb. For example:\n $ kubectl access-matrix\n\nIt also supports a mode which prints all subjects with access to a given\nresource (needs read access to Roles and ClusterRoles). For example:\n $ kubectl access-matrix for configmap\n",
+          "caveats": "Usage:\n  kubectl access-matrix\n  kubectl access-matrix for pods\n",
+          "homepage": "https://github.com/corneliusweig/rakkess"
+        }
+      },
+      {
+        "kind": "Plugin",
+        "apiVersion": "krew.googlecontainertools.github.com/v1alpha2",
+        "metadata": {
+          "name": "advise-psp",
+          "creationTimestamp": null
+        },
+        "spec": {
+          "version": "v1.6.0",
+          "shortDescription": "Suggests PodSecurityPolicies for cluster.",
+          "description": "Suggests PSPs based on the required capabilities of the currently running\nworkloads or a given manifest.\n",
+          "homepage": "https://github.com/sysdiglabs/kube-psp-advisor"
+        }
+      },
+      {
+        "kind": "Plugin",
+        "apiVersion": "krew.googlecontainertools.github.com/v1alpha2",
+        "metadata": {
+          "name": "auth-proxy",
+          "creationTimestamp": null
+        },
+        "spec": {
+          "version": "v1.0.0",
+          "shortDescription": "Authentication proxy to a pod or service",
+          "description": "This is a kubectl plugin to forward a local port to a pod or service via the authentication proxy.\nIt gets a token from the current credential plugin (e.g. aws-iam-authenticator or kubelogin).\nThen it appends the authorization header to HTTP requests, like `authorization: Bearer token`.\nAll traffic is routed by the authentication proxy and port forwarder as follows:\n  [browser] -\u003e [authentication proxy] -\u003e [port forwarder] -\u003e [pod]\n",
+          "caveats": "You need to configure authentication in the kubeconfig.\nSee https://github.com/int128/kauthproxy for more.\n",
+          "homepage": "https://github.com/int128/kauthproxy"
+        }
+      },
+      {
+        "kind": "Plugin",
+        "apiVersion": "krew.googlecontainertools.github.com/v1alpha2",
+        "metadata": {
+          "name": "bulk-action",
+          "creationTimestamp": null
+        },
+        "spec": {
+          "version": "v1.1.0-beta",
+          "shortDescription": "Do bulk actions on Kubernetes resources.",
+          "description": "This plugin allows you to do bulk actions on Kubernetes resources.\n",
+          "caveats": "Usage:\n  kubectl bulk-action \u003cget resourceTypes\u003e (get|list|create|update|delete|remove|rollout) \u003ccommand parameters\u003e\n\nRead the documentation at:\n  https://github.com/emreodabas/kubectl-plugins\nThis plugin needs the following programs:\n* grep\n* sed\n",
+          "homepage": "https://github.com/emreodabas/kubectl-plugins#kubectl-bulk"
+        }
+      },
+      {
+        "kind": "Plugin",
+        "apiVersion": "krew.googlecontainertools.github.com/v1alpha2",
+        "metadata": {
+          "name": "ca-cert",
+          "creationTimestamp": null
+        },
+        "spec": {
+          "version": "v0.0.0",
+          "shortDescription": "Print the PEM CA certificate of the current cluster",
+          "description": "Pretty print the current cluster certificate. The plugin formats the\ncertificate in PEM format described in RFC1421.\n",
+          "caveats": "This plugin needs the following programs:\n* base64\n",
+          "homepage": "https://github.com/ahmetb/kubectl-extras"
+        }
+      },
+      {
+        "kind": "Plugin",
+        "apiVersion": "krew.googlecontainertools.github.com/v1alpha2",
+        "metadata": {
+          "name": "capture",
+          "creationTimestamp": null
+        },
+        "spec": {
+          "version": "v0.1.0",
+          "shortDescription": "Triggers a Sysdig capture to troubleshoot the running pod",
+          "description": "Sysdig is a powerful open source tool for container troubleshooting,\nperformance tunning and security investigation.\n\nThis plugin triggers a capture in the underlying host which is running a\npod. A capture file is created for a duration of time and is downloaded\nlocally in order to use it with Sysdig Inspect. You can download Sysdig\nInspect in the following link: https://github.com/draios/sysdig-inspect\n\nFinally, you can set the duration in seconds of the capture with the `-M`\nflag, and also specify the namespace using the `-n` or `--namespace` or use\neBPF to trace syscalls instead the kernel module instrumentation with\n`--ebpf` flag.\n\nExample:\n\n$ kubectl capture nginx-78f5d695bd-bcbd8\nSysdig is starting to capture system calls:\n\nNode: gke-sysdig-work-default-pool-e35da3a1-m8vp\nPod: nginx-78f5d695bd-bcbd8\nDuration: 30 seconds\nParameters for Sysdig: -S -M 30 -pk -z -w /capture-nginx-78f5d695bd-bcbd8-1550246926.scap.gz\n\nThe capture has been downloaded to your hard disk at:\n~/captures/capture-nginx-78f5d695bd-bcbd8-1550246926.scap.gz\n",
+          "caveats": "In order to get the plugin running you will need the following prerequisites:\n\n* The user must be allowed to create privileged pods.\n* Sysdig uses kernel mechanisms to source the system calls, it tries to\n  download a kernel module to get the system calls and if it can't be\n  downloaded it will try to compile its own, so you will need to have\n  the kernel headers installed and available.\n* Alternatively, eBPF is supported as well. You will need a kernel greater\n  than 4.14 to use eBPF probe. In particular you will need CONFIG_BPF=y,\n  CONFIG_BPF_JIT=y and CONFIG_BPF_SYSCALL=y.\n\n\nAnd on the analysis side, to analyze the capture file you will need to use\nSysdig Inspect. You can use it as docker image directly:\n\n$ docker run -d -v /local/path/to/captures:/captures -p8080:3000 sysdig/sysdig-inspect:latest\n",
+          "homepage": "https://github.com/sysdiglabs/kubectl-capture"
+        }
+      },
+      {
+        "kind": "Plugin",
+        "apiVersion": "krew.googlecontainertools.github.com/v1alpha2",
+        "metadata": {
+          "name": "change-ns",
+          "creationTimestamp": null
+        },
+        "spec": {
+          "version": "v1.0.0",
+          "shortDescription": "View or change the current namespace via kubectl.",
+          "description": "View or change the current namespace in your KUBECONFIG file. Honors global config flags found in kubectl, such as `--user`, `--cluster`, `--context`, and `--namespace`.",
+          "caveats": "This plugin requires an existing KUBECONFIG file, with a `current-context` field set.",
+          "homepage": "https://github.com/juanvallejo/kubectl-ns"
+        }
+      },
+      {
+        "kind": "Plugin",
+        "apiVersion": "krew.googlecontainertools.github.com/v1alpha2",
+        "metadata": {
+          "name": "config-cleanup",
+          "creationTimestamp": null
+        },
+        "spec": {
+          "version": "v0.5.0",
+          "shortDescription": "Automatically clean up your kubeconfig",
+          "description": "This plugin will attempt to connect to each apiserver specified by a context entry in your kubeconfig.\nIf the connection succeeds then the user, cluster, and context entries are maintained in the result.\nOtherwise, the entries are removed.\n",
+          "homepage": "https://github.com/b23llc/kubectl-config-cleanup"
+        }
+      },
+      {
+        "kind": "Plugin",
+        "apiVersion": "krew.googlecontainertools.github.com/v1alpha2",
+        "metadata": {
+          "name": "cssh",
+          "creationTimestamp": null
+        },
+        "spec": {
+          "version": "v1.0.1",
+          "shortDescription": "SSH into Kubernetes nodes",
+          "description": "This plugin allows users to SSH into one more more Kubernetes nodes\nwithin separate tmux panes.\n",
+          "caveats": "This plugin needs the following programs:\n* tmux\n",
+          "homepage": "https://github.com/containership/kubectl-cssh"
+        }
+      },
+      {
+        "kind": "Plugin",
+        "apiVersion": "krew.googlecontainertools.github.com/v1alpha2",
+        "metadata": {
+          "name": "ctx",
+          "creationTimestamp": null
+        },
+        "spec": {
+          "version": "v0.7.1",
+          "shortDescription": "Switch between contexts in your kubeconfig",
+          "description": "Also known as \"kubectx\", a utility to switch between context entries in\nyour kubeconfig file efficiently.\n",
+          "caveats": "If fzf is installed on your machine, you can interactively choose\nbetween the entries using the arrow keys, or by fuzzy searching\nas you type.\n\nSee https://github.com/ahmetb/kubectx for customization and details.\n",
+          "homepage": "https://github.com/ahmetb/kubectx"
+        }
+      },
+      {
+        "kind": "Plugin",
+        "apiVersion": "krew.googlecontainertools.github.com/v1alpha2",
+        "metadata": {
+          "name": "custom-cols",
+          "creationTimestamp": null
+        },
+        "spec": {
+          "version": "v0.0.3",
+          "shortDescription": "A \"kubectl get\" replacement with customizable column presets",
+          "description": "A \"kubectl get\" replacement with customizable column presets.\n\nIt's time saving to retrieve some often needed infos like\nimage names, containers names, versions, labels, etc...\nIt currently supports the following templates (but PRs are welcome upstream):\n- annotations\n- images\n- limits\n- qos-class\n- requests\n",
+          "caveats": "The list of templates is for now limited and can be retrieved with the --help option.\nPlease feel free to submit any PR upstream (see github repo) to add more.\n",
+          "homepage": "https://github.com/webofmars/kubectl-custom-cols"
+        }
+      },
+      {
+        "kind": "Plugin",
+        "apiVersion": "krew.googlecontainertools.github.com/v1alpha2",
+        "metadata": {
+          "name": "debug-shell",
+          "creationTimestamp": null
+        },
+        "spec": {
+          "version": "v1.0.2",
+          "shortDescription": "Create pod with interactive kube-shell.",
+          "homepage": "https://github.com/danisla/kubefunc"
+        }
+      },
+      {
+        "kind": "Plugin",
+        "apiVersion": "krew.googlecontainertools.github.com/v1alpha2",
+        "metadata": {
+          "name": "debug",
+          "creationTimestamp": null
+        },
+        "spec": {
+          "version": "v0.1.2",
+          "shortDescription": "Attach ephemeral debug container to running pod",
+          "description": "This plugin attaches an Ephemeral Container to a running pod for use as an interactive\ndebugging session. For example, to run busybox in the running pod \"mypod\":\n\n  # kubectl debug mypod --attach\n\nSee `kubectl debug --help` for additional examples and usage instructions.\n\nFor more information on Ephemeral Containers, and to understand their limitations, see\nhttps://kubernetes.io/docs/concepts/workloads/pods/ephemeral-containers/\n\nSee https://bit.ly/kubectl-debug-demo for a demonstration of this plugin.\n",
+          "caveats": "This plugin requires the alpha EphemeralContainers feature to be enabled in the cluster.\nSee https://kubernetes.io/docs/reference/command-line-tools-reference/feature-gates/ for\nenabling features.\n",
+          "homepage": "https://github.com/verb/kubectl-debug"
+        }
+      },
+      {
+        "kind": "Plugin",
+        "apiVersion": "krew.googlecontainertools.github.com/v1alpha2",
+        "metadata": {
+          "name": "deprecations",
+          "creationTimestamp": null
+        },
+        "spec": {
+          "version": "v0.2.4",
+          "shortDescription": "Checks for deprecated objects in a cluster ",
+          "description": "This plugin shows all the deprecated objects in a Kubernetes cluster allowing \nthe operator to verify them before upgrading the cluster. It uses the \nswagger.json version available in master branch of Kubernetes repository\n(github.com/kubernetes/kubernetes) as a reference. The branch can be changed \nto some other desired Kubernetes version\n",
+          "caveats": "* By default, deprecations finds deprecated object relative to the current kubernetes\nmaster branch. To target a different kubernetes release, use the --k8s-version\nargument.\n\n* Deprecations needs permission to GET all objects in the Cluster\n",
+          "homepage": "https://github.com/rikatz/kubepug"
+        }
+      },
+      {
+        "kind": "Plugin",
+        "apiVersion": "krew.googlecontainertools.github.com/v1alpha2",
+        "metadata": {
+          "name": "df-pv",
+          "creationTimestamp": null
+        },
+        "spec": {
+          "version": "v0.1.0",
+          "shortDescription": "Show disk usage (like unix df) for persistent volumes",
+          "description": "This plugin emulates Unix style df for persistent volumes.\n",
+          "homepage": "https://github.com/yashbhutwala/kubectl-df-pv"
+        }
+      },
+      {
+        "kind": "Plugin",
+        "apiVersion": "krew.googlecontainertools.github.com/v1alpha2",
+        "metadata": {
+          "name": "doctor",
+          "creationTimestamp": null
+        },
+        "spec": {
+          "version": "v0.3.0",
+          "shortDescription": "Scans your cluster and reports anomalies.",
+          "description": "This plugin is inspired by brew doctor.\nIt will scan the active kube-context for anomalies or\nuseful action points that it can report back to you.\nThis plugin does not change any state or configuration.\n\nPlease check the repository for an example report:\n\n* https://github.com/emirozer/kubectl-doctor\n",
+          "caveats": "This plugin needs higher privileges on core API group.\nPotentially a ClusterRole that can get cluster-scoped resources.\nSuch as nodes / all namespaces etc.\n",
+          "homepage": "https://github.com/emirozer/kubectl-doctor"
+        }
+      },
+      {
+        "kind": "Plugin",
+        "apiVersion": "krew.googlecontainertools.github.com/v1alpha2",
+        "metadata": {
+          "name": "duck",
+          "creationTimestamp": null
+        },
+        "spec": {
+          "version": "v0.0.1",
+          "shortDescription": "List custom resources with ducktype support",
+          "description": "This plugin allows you to list and get custom resources based on ducktype\nlabels on CRDs.\n",
+          "caveats": "* Ducktype labels are currenly hardcoded to known types from Knative.\n",
+          "homepage": "https://github.com/n3wscott/kubectl-duck"
+        }
+      },
+      {
+        "kind": "Plugin",
+        "apiVersion": "krew.googlecontainertools.github.com/v1alpha2",
+        "metadata": {
+          "name": "eksporter",
+          "creationTimestamp": null
+        },
+        "spec": {
+          "version": "v1.1.0",
+          "shortDescription": "Export resources and removes a pre-defined set of fields for later import",
+          "description": "This plugin helps you export a resource, and removes a pre-defined set of\nfields. This is useful for when you have resource you want to migrate from\none namespace or cluster, to another one, but need to edit/add some fields\nbefore applying.\n\nIf you just need to move one resource, it's probably easier to just:\n  kubectl get -oyaml | kubectl create -f -\n\nRun the tool with:\n  kubectl eksporter \u003cresource\u003e \u003cresource_name\u003e\nOr with piping:\n  kubectl get pods -o yaml \u003cresource_name\u003e | kubectl eksporter\n",
+          "caveats": "This plugin needs the following programs:\n* ruby\n",
+          "homepage": "https://github.com/Kyrremann/kubectl-eksporter"
+        }
+      },
+      {
+        "kind": "Plugin",
+        "apiVersion": "krew.googlecontainertools.github.com/v1alpha2",
+        "metadata": {
+          "name": "evict-pod",
+          "creationTimestamp": null
+        },
+        "spec": {
+          "version": "v0.0.7",
+          "shortDescription": "Evicts the given pod",
+          "description": "Usage:\n  kubectl evict-pod \u003cpod-name\u003e -n \u003cnamespace-name\u003e\n  This plugin evicts the given pod. This is particularly useful for testing pod disruption budget rules.\n  Read more documentation at: https://github.com/rajatjindal/kubectl-evict-pod",
+          "homepage": "https://github.com/rajatjindal/kubectl-evict-pod"
+        }
+      },
+      {
+        "kind": "Plugin",
+        "apiVersion": "krew.googlecontainertools.github.com/v1alpha2",
+        "metadata": {
+          "name": "exec-as",
+          "creationTimestamp": null
+        },
+        "spec": {
+          "version": "v1.0.3-krew",
+          "shortDescription": "Like kubectl exec, but offers a `user` flag to exec as root or any other user.",
+          "description": "Run `kubectl exec-as` for usage. Example, `kubectl exec-as -u root zookeeper-0`.",
+          "caveats": "The node which the pod is running on cannot have more than one taint.",
+          "homepage": "https://github.com/jordanwilson230/kubectl-plugins/tree/krew#kubectl-exec-as"
+        }
+      },
+      {
+        "kind": "Plugin",
+        "apiVersion": "krew.googlecontainertools.github.com/v1alpha2",
+        "metadata": {
+          "name": "exec-cronjob",
+          "creationTimestamp": null
+        },
+        "spec": {
+          "version": "v0.5.1",
+          "shortDescription": "Run a CronJob immediately as Job",
+          "description": "Run a CronJob immediately as Job by extracting the Job spec and creating a\nJob instance thereof.\n",
+          "caveats": "Usage:\n    kubectl exec-cronjob \u003cname\u003e [options]\n\nOptions:\n    -n, --namespace='': If present, the namespace scope for this CLI request\n    --dry-run: If true, only print the object that would be sent, without sending it.\n    -h, --help: Display this help\n\nRead the documentation at:\n  https://github.com/thecloudnatives/kubectl-plugins#exec-cronjob\n",
+          "homepage": "https://github.com/thecloudnatives/kubectl-plugins#exec-cronjob"
+        }
+      },
+      {
+        "kind": "Plugin",
+        "apiVersion": "krew.googlecontainertools.github.com/v1alpha2",
+        "metadata": {
+          "name": "fields",
+          "creationTimestamp": null
+        },
+        "spec": {
+          "version": "v1.2.3",
+          "shortDescription": "Grep resources hierarchy by field name",
+          "description": "kubectl-fields parses specified kubectl resources to match given pattern(s).\nIt prints parental hierarchy of matched fields in one-liner format.\n\nMore on https://github.com/rewanth1997/kubectl-fields\n\nExamples:\n\nFind resource field hierarchy:\n$ kubectl fields svc affinity\nspec.sessionAffinity\nspec.sessionAffinityConfig\n\nFind resource field hierarchy (case sensitive match):\n$ kubectl fields po.spec.volumes -I Ver\ndownwardAPI.items.fieldRef.apiVersion\nprojected.sources.downwardAPI.items.fieldRef.apiVersion\n",
+          "caveats": "Usage:\n  kubectl fields \u003cRESOURCE\u003e [options] \u003cPATTERN\u003e\n\nDocumentation:\n  https://github.com/rewanth1997/kubectl-fields/blob/master/README.md\n",
+          "homepage": "https://github.com/rewanth1997/kubectl-fields"
+        }
+      },
+      {
+        "kind": "Plugin",
+        "apiVersion": "krew.googlecontainertools.github.com/v1alpha2",
+        "metadata": {
+          "name": "fleet",
+          "creationTimestamp": null
+        },
+        "spec": {
+          "version": "v0.1.4",
+          "shortDescription": "Shows config and resources of a fleet of clusters",
+          "description": "Allows to get an overview and details on a fleet of Kubernetes clusters.\nThe top-level command lists all active clusters found in the kubeconfig provided.\nFor each cluster, configuration info such as the control plane version or \nAPI server endpoint are displayed, as well as select stats, for example, \nthe number of worker nodes or namespaces found in the cluster.\n",
+          "caveats": "Usage:\n  $ kubectl fleet\n\nFor additional options:\n  $ kubectl fleet --help\n  or https://github.com/mhausenblas/kcf/blob/v0.1.4/doc/USAGE.md\n",
+          "homepage": "https://github.com/mhausenblas/kcf"
+        }
+      },
+      {
+        "kind": "Plugin",
+        "apiVersion": "krew.googlecontainertools.github.com/v1alpha2",
+        "metadata": {
+          "name": "get-all",
+          "creationTimestamp": null
+        },
+        "spec": {
+          "version": "v1.3.1",
+          "shortDescription": "Like `kubectl get all` but _really_ everything",
+          "description": "\n  Like 'kubectl get all', but get _really_ all resources\n\n  For a complete overview of all resources in a kubernetes cluster,\n   $ kubectl get all --all-namespaces\n  is not enough, because it simply does not show everything. This helper\n  lists _really_ all resources on the cluster.\n\n  More on https://github.com/corneliusweig/ketall/blob/master/doc/USAGE.md\n",
+          "homepage": "https://github.com/corneliusweig/ketall"
+        }
+      },
+      {
+        "kind": "Plugin",
+        "apiVersion": "krew.googlecontainertools.github.com/v1alpha2",
+        "metadata": {
+          "name": "gke-credentials",
+          "creationTimestamp": null
+        },
+        "spec": {
+          "version": "v1.0.1",
+          "shortDescription": "Fetch credentials for GKE clusters",
+          "caveats": "This plugin needs the following programs:\n* gcloud\n",
+          "homepage": "https://github.com/danisla/kubefunc"
+        }
+      },
+      {
+        "kind": "Plugin",
+        "apiVersion": "krew.googlecontainertools.github.com/v1alpha2",
+        "metadata": {
+          "name": "gopass",
+          "creationTimestamp": null
+        },
+        "spec": {
+          "version": "v0.1.0",
+          "shortDescription": "Imports secrets from gopass",
+          "description": "This plugin allows applying and diffing secrets from gopass to kubernetes\nand creating kubernetes secrets in gopass (https://www.gopass.pw/).\n",
+          "caveats": "This plugin requires bash and gopass\n",
+          "homepage": "https://github.com/gopasspw/kubectl-gopass"
+        }
+      },
+      {
+        "kind": "Plugin",
+        "apiVersion": "krew.googlecontainertools.github.com/v1alpha2",
+        "metadata": {
+          "name": "grep",
+          "creationTimestamp": null
+        },
+        "spec": {
+          "version": "v1.2.2",
+          "shortDescription": "Filter Kubernetes resources by matching their names",
+          "description": "Filter Kubernetes resources by matching their names\n\nExamples:\n\nList all pods in all namespaces\n$ kubectl grep pods --all-namespaces\n\nList all pods in namespace \"star-lab\" which contain the keyword \"flash\"\n$ kubectl grep pods -n star-lab flash\n\nNo more pipe, built-in grep :-)\n",
+          "caveats": "This plugin requires an existing KUBECONFIG file, with a `current-context` field set.\n\nUsage:\n\n  $ kubectl grep # output help messages\n\nMore Info:\n- https://github.com/guessi/kubectl-grep\n",
+          "homepage": "https://github.com/guessi/kubectl-grep"
+        }
+      },
+      {
+        "kind": "Plugin",
+        "apiVersion": "krew.googlecontainertools.github.com/v1alpha2",
+        "metadata": {
+          "name": "iexec",
+          "creationTimestamp": null
+        },
+        "spec": {
+          "version": "v1.2.0",
+          "shortDescription": "Interactive selection tool for `kubectl exec`",
+          "description": "Interactive pod and container selector for `kubectl exec`\n",
+          "caveats": "Read documentation at: https://github.com/gabeduke/kubectl-iexec\nTo get help run: kubectl iexec --help\n\nExamples:\n\nRun command in container:\n  kubectl iexec [pod] [command]\n",
+          "homepage": "https://github.com/gabeduke/kubectl-iexec"
+        }
+      },
+      {
+        "kind": "Plugin",
+        "apiVersion": "krew.googlecontainertools.github.com/v1alpha2",
+        "metadata": {
+          "name": "ingress-nginx",
+          "creationTimestamp": null
+        },
+        "spec": {
+          "version": "v0.25.0",
+          "shortDescription": "Interact with ingress-nginx",
+          "description": "The official kubectl plugin for ingress-nginx.\n",
+          "homepage": "https://kubernetes.github.io/ingress-nginx/kubectl-plugin/"
+        }
+      },
+      {
+        "kind": "Plugin",
+        "apiVersion": "krew.googlecontainertools.github.com/v1alpha2",
+        "metadata": {
+          "name": "konfig",
+          "creationTimestamp": null
+        },
+        "spec": {
+          "version": "v0.2.2",
+          "shortDescription": "Merge, split or import kubeconfig files",
+          "description": "\n  konfig helps to merge, split or import kubeconfig files\n\n  This is a convenience wrapper around the `kubectl config view` command.\n\n  More on https://github.com/corneliusweig/konfig/blob/v0.2.2/doc/USAGE.md#usage\n",
+          "caveats": "Usage:\n  $ kubectl konfig import --save new-cfg\n  $ kubectl konfig merge kubeconfig1 kubeconfig2 \u003e merged\n  $ kubectl konfig export ctx1 ctx2 -k k8s.yaml,k3s.yaml \u003e extracted\n\nDocumentation:\n  $ kubectl konfig help\n  or https://github.com/corneliusweig/konfig/blob/v0.2.2/doc/USAGE.md#usage\n",
+          "homepage": "https://github.com/corneliusweig/konfig"
+        }
+      },
+      {
+        "kind": "Plugin",
+        "apiVersion": "krew.googlecontainertools.github.com/v1alpha2",
+        "metadata": {
+          "name": "krew",
+          "creationTimestamp": null
+        },
+        "spec": {
+          "version": "v0.3.3",
+          "shortDescription": "Package manager for kubectl plugins.",
+          "caveats": "krew is now installed! To start using kubectl plugins, you need to add\nkrew's installation directory to your PATH:\n\n  * macOS/Linux:\n    - Add the following to your ~/.bashrc or ~/.zshrc:\n        export PATH=\"${KREW_ROOT:-$HOME/.krew}/bin:$PATH\"\n    - Restart your shell.\n\n  * Windows: Add %USERPROFILE%\\.krew\\bin to your PATH environment variable\n\nTo list krew commands and to get help, run:\n  $ kubectl krew\nFor a full list of available plugins, run:\n  $ kubectl krew search\n\nYou can find documentation at https://sigs.k8s.io/krew.\n",
+          "homepage": "https://sigs.k8s.io/krew"
+        }
+      },
+      {
+        "kind": "Plugin",
+        "apiVersion": "krew.googlecontainertools.github.com/v1alpha2",
+        "metadata": {
+          "name": "kubesec-scan",
+          "creationTimestamp": null
+        },
+        "spec": {
+          "version": "v1.0.0",
+          "shortDescription": "Scan Kubernetes resources with kubesec.io.",
+          "description": "This plugin uploads the specified Kubernetes resource’s API representation\nto https://kubesec.io/ for security best practices scanning.\n",
+          "caveats": "Read the documentation at https://github.com/stefanprodan/kubectl-kubesec.\nYou can call this plugin like \"kubectl kubesec-scan\".\n",
+          "homepage": "https://github.com/stefanprodan/kubectl-kubesec"
+        }
+      },
+      {
+        "kind": "Plugin",
+        "apiVersion": "krew.googlecontainertools.github.com/v1alpha2",
+        "metadata": {
+          "name": "kudo",
+          "creationTimestamp": null
+        },
+        "spec": {
+          "version": "v0.10.0",
+          "shortDescription": "Declaratively build, install, and run operators using KUDO.",
+          "description": "The Kubernetes Universal Declarative Operator (KUDO) is a highly productive\ntoolkit for writing operators for Kubernetes. Using KUDO, you can deploy\nyour applications, give your users the tools they need to operate it, and\nunderstand how it's behaving in their environments — all without a PhD in\nKubernetes.\n",
+          "caveats": "Requires the KUDO controller to be installed:\n  kubectl kudo init\nExample usage:\n  Install kafka:\n    kubectl kudo install kafka\n  List installed operator instances:\n    kubectl kudo get instances\nSee the documentation for more information: https://kudo.dev/docs/\n",
+          "homepage": "https://kudo.dev/"
+        }
+      },
+      {
+        "kind": "Plugin",
+        "apiVersion": "krew.googlecontainertools.github.com/v1alpha2",
+        "metadata": {
+          "name": "match-name",
+          "creationTimestamp": null
+        },
+        "spec": {
+          "version": "v0.1.3",
+          "shortDescription": "Match names of pods and other API objects",
+          "description": "This plugin allows fast regex matching for the names of pods and other API objects. It reduces typing and simplifies automation.\n",
+          "caveats": "API object coverage is incomplete.\n",
+          "homepage": "https://github.com/gerald1248/kubectl-match-name"
+        }
+      },
+      {
+        "kind": "Plugin",
+        "apiVersion": "krew.googlecontainertools.github.com/v1alpha2",
+        "metadata": {
+          "name": "modify-secret",
+          "creationTimestamp": null
+        },
+        "spec": {
+          "version": "v0.0.34",
+          "shortDescription": "modify secret with implicit base64 translations",
+          "description": "Usage:\n  kubectl modify-secret secret-name -n kube-system\n\n  This plugin fetches the given secret manifest from the cluster, decodes \n  the payload, opens an editor to make changes, and applies the modified \n  manifest when done.\n",
+          "caveats": "Usage:\n  kubectl modify-secret secret-name -n kube-system\n\nRead the documentation at:\n  https://github.com/rajatjindal/kubectl-modify-secret\n",
+          "homepage": "https://github.com/rajatjindal/kubectl-modify-secret"
+        }
+      },
+      {
+        "kind": "Plugin",
+        "apiVersion": "krew.googlecontainertools.github.com/v1alpha2",
+        "metadata": {
+          "name": "mtail",
+          "creationTimestamp": null
+        },
+        "spec": {
+          "version": "v1.2.0",
+          "shortDescription": "Tail logs from multiple pods matching label selector",
+          "caveats": "This plugin needs the following programs:\n* jq\n",
+          "homepage": "https://gitlab.com/grzesuav/kubectl-mtail"
+        }
+      },
+      {
+        "kind": "Plugin",
+        "apiVersion": "krew.googlecontainertools.github.com/v1alpha2",
+        "metadata": {
+          "name": "neat",
+          "creationTimestamp": null
+        },
+        "spec": {
+          "version": "v1.1.0",
+          "shortDescription": "Remove clutter from Kubernetes manifests to make them more readable.",
+          "description": "If you try to `kubectl get` resources you have just created,\nthey be unreadably verbose. `kubectl-neat` cleans that up by\nremoving default values, runtime information, and other internal fields.\nExamples:\n`$ kubectl get pod mypod -o yaml | kubectl neat`\n`$ kubectl neat pod mypod -o yaml`\n",
+          "homepage": "https://github.com/itaysk/kubectl-neat"
+        }
+      },
+      {
+        "kind": "Plugin",
+        "apiVersion": "krew.googlecontainertools.github.com/v1alpha2",
+        "metadata": {
+          "name": "net-forward",
+          "creationTimestamp": null
+        },
+        "spec": {
+          "version": "v1.0.3",
+          "shortDescription": "Proxy to arbitrary TCP services on a cluster network",
+          "description": "A plugin similar to kubectl port-forward but without requiring users to\nenter a Pod or Svc object existing the cluster. Instead you can choose any\nIP address and port of your choosing. You could for example use it to test\nwhether a Namespace is able to access a Pod's private IP in a different\nNamespace. Or use it to connect to a non-k8s service located on an adjacent\nsubnet outside of the cluster itself. It does this (similar to port-forward)\nby deploying a socat Pod and listener that you can port-forward to you to\ncreate a local listener service (default 127.0.0.1:9999), which\nauto-forwards to the IP and port the users supplies.\n",
+          "caveats": "This plugin needs the alpine:socat image available to the node.\n",
+          "homepage": "https://github.com/antitree/krew-net-forward"
+        }
+      },
+      {
+        "kind": "Plugin",
+        "apiVersion": "krew.googlecontainertools.github.com/v1alpha2",
+        "metadata": {
+          "name": "node-admin",
+          "creationTimestamp": null
+        },
+        "spec": {
+          "version": "v1.0.2",
+          "shortDescription": "List nodes and run privileged pod with chroot",
+          "homepage": "https://github.com/danisla/kubefunc"
+        }
+      },
+      {
+        "kind": "Plugin",
+        "apiVersion": "krew.googlecontainertools.github.com/v1alpha2",
+        "metadata": {
+          "name": "node-shell",
+          "creationTimestamp": null
+        },
+        "spec": {
+          "version": "v1.0.1",
+          "shortDescription": "Spawn a root shell on a node via kubectl",
+          "description": "Start a root shell in the node's host OS running.\nYou need to be able to start privileged containers for that.\n",
+          "caveats": "Usage:\n\n  $ kubectl node-shell \u003cnode\u003e\n\nNote:\n\n  You need to be allowed to start privileged pods in the cluster\n",
+          "homepage": "https://github.com/kvaps/kubectl-node-shell"
+        }
+      },
+      {
+        "kind": "Plugin",
+        "apiVersion": "krew.googlecontainertools.github.com/v1alpha2",
+        "metadata": {
+          "name": "ns",
+          "creationTimestamp": null
+        },
+        "spec": {
+          "version": "v0.7.1",
+          "shortDescription": "Switch between Kubernetes namespaces",
+          "description": "Also known as \"kubens\", a utility to set your current namespace and switch\nbetween them.\n",
+          "caveats": "If fzf is installed on your machine, you can interactively choose\nbetween the entries using the arrow keys, or by fuzzy searching\nas you type.\n\nSee https://github.com/ahmetb/kubectx for customization and details.\n",
+          "homepage": "https://github.com/ahmetb/kubectx"
+        }
+      },
+      {
+        "kind": "Plugin",
+        "apiVersion": "krew.googlecontainertools.github.com/v1alpha2",
+        "metadata": {
+          "name": "oidc-login",
+          "creationTimestamp": null
+        },
+        "spec": {
+          "version": "v1.16.0",
+          "shortDescription": "Log in to the OpenID Connect provider",
+          "description": "This is a kubectl plugin for Kubernetes OpenID Connect (OIDC) authentication.\n\n## Credential plugin mode\nkubectl executes oidc-login before calling the Kubernetes APIs.\noidc-login automatically opens the browser and you can log in to the provider.\nAfter authentication, kubectl gets the token from oidc-login and you can access the cluster.\nSee https://github.com/int128/kubelogin#credential-plugin-mode for more.\n\n## Standalone mode\nRun `kubectl oidc-login`.\nIt automatically opens the browser and you can log in to the provider.\nAfter authentication, it writes the token to the kubeconfig and you can access the cluster.\nSee https://github.com/int128/kubelogin#standalone-mode for more.\n",
+          "caveats": "You need to setup the OIDC provider, Kubernetes API server, role binding and kubeconfig.\nSee https://github.com/int128/kubelogin for more.\n",
+          "homepage": "https://github.com/int128/kubelogin"
+        }
+      },
+      {
+        "kind": "Plugin",
+        "apiVersion": "krew.googlecontainertools.github.com/v1alpha2",
+        "metadata": {
+          "name": "open-svc",
+          "creationTimestamp": null
+        },
+        "spec": {
+          "version": "v2.3.0",
+          "shortDescription": "Open the Kubernetes URL(s) for the specified service in your browser.",
+          "description": "Open the Kubernetes URL(s) for the specified service in your browser.\nUnlike the `kubectl port-forward` command, this plugin makes services\naccessible via their ClusterIP.\n",
+          "homepage": "https://github.com/superbrothers/kubectl-open-svc-plugin"
+        }
+      },
+      {
+        "kind": "Plugin",
+        "apiVersion": "krew.googlecontainertools.github.com/v1alpha2",
+        "metadata": {
+          "name": "outdated",
+          "creationTimestamp": null
+        },
+        "spec": {
+          "version": "v0.3.2",
+          "shortDescription": "Finds outdated container images running in a cluster",
+          "description": "The plugin will scan for all pods in all namespaces that you have at least\nread access to. It will then connect to the registry that hosts the image,\nand (if there's permission), it will analyze your tag to the list of\ncurrent tags.\n\nThe output is a list of all images, with the most out-of-date images in red,\nslightly outdated in yellow, and up-to-date in green.\n",
+          "caveats": "Usage:\n  $ kubectl outdated\n\nFor additional options:\n  $ kubectl outdated --help\n  or https://github.com/replicatedhq/outdated/blob/master/doc/USAGE.md\n",
+          "homepage": "https://github.com/replicatedhq/outdated"
+        }
+      },
+      {
+        "kind": "Plugin",
+        "apiVersion": "krew.googlecontainertools.github.com/v1alpha2",
+        "metadata": {
+          "name": "passman",
+          "creationTimestamp": null
+        },
+        "spec": {
+          "version": "v1.1.1",
+          "shortDescription": "Store kubeconfig credentials in keychains or password managers",
+          "description": "An effective way to keep your credentials somewhere better than in plain text\n",
+          "caveats": "This plugin needs a usable keychain or password manager\nSee usage docs https://github.com/chrisns/kubectl-passman\n",
+          "homepage": "https://github.com/chrisns/kubectl-passman"
+        }
+      },
+      {
+        "kind": "Plugin",
+        "apiVersion": "krew.googlecontainertools.github.com/v1alpha2",
+        "metadata": {
+          "name": "pod-dive",
+          "creationTimestamp": null
+        },
+        "spec": {
+          "version": "v0.1.4",
+          "shortDescription": "Shows a pod's workload tree and info inside a node",
+          "description": "Dives into a node after the desired pod and returns data associated\nwith the pod no matter where it is running, such as its origin workload,\nnamespace, the node where it is running and its node pod siblings, as\nwell basic health status of it all.\n\nThe purpose is to have meaningful pod info at a glance without needing to\nrun multiple kubectl commands to see what else is running next to your\npod in a given node inside a huge cluster, because sometimes all\nyou've got from an alert is the pod name. \n\nUsage\n  $ kubectl pod-dive [pod name]\n\nFor additional options\n  $ kubectl pod-dive --help\n",
+          "homepage": "https://github.com/caiobegotti/pod-dive"
+        }
+      },
+      {
+        "kind": "Plugin",
+        "apiVersion": "krew.googlecontainertools.github.com/v1alpha2",
+        "metadata": {
+          "name": "pod-logs",
+          "creationTimestamp": null
+        },
+        "spec": {
+          "version": "v1.0.1",
+          "shortDescription": "Display a list of pods to get logs from",
+          "homepage": "https://github.com/danisla/kubefunc"
+        }
+      },
+      {
+        "kind": "Plugin",
+        "apiVersion": "krew.googlecontainertools.github.com/v1alpha2",
+        "metadata": {
+          "name": "pod-shell",
+          "creationTimestamp": null
+        },
+        "spec": {
+          "version": "v1.0.1",
+          "shortDescription": "Display a list of pods to execute a shell in",
+          "homepage": "https://github.com/danisla/kubefunc"
+        }
+      },
+      {
+        "kind": "Plugin",
+        "apiVersion": "krew.googlecontainertools.github.com/v1alpha2",
+        "metadata": {
+          "name": "preflight",
+          "creationTimestamp": null
+        },
+        "spec": {
+          "version": "v0.9.21",
+          "shortDescription": "Executes application preflight tests in a cluster",
+          "description": "This plugin executes application-specific preflight checks and conformance\ntests against a cluster, prior to installation of an application.\n\nApplication developers can create and host a Preflight manifest that\ndefines the minimum and desired Kubernetes environment for an application.\nBefore installing the application, a cluster admin can use this plugin to\nexecute the application preflight checksto identify any missing\ncomponents, configuration or incompatibilities between the cluster and the\ndesired environment.\n\nWhen executing Preflight tests, the test results will be displayed in a\nterminal-based UI on the workstation that executed the command.\n\nFor information on creating a Preflight manifest, view the documentation\nat https://help.replicated.com/docs/troubleshoot/kubernetes/analysis/\n",
+          "caveats": "Usage:\n  $ kubectl preflight \u003curi/path\u003e\n\n  where \u003curi/path\u003e references a set of application preflight checks\n\n  For example:\n\n  $ kubectl preflight https://preflight.replicated.com\n\nFor additional options:\n  $ kubectl preflight --help\n\nDocumentation:\n  Full documentation on this plugin is available at:\n  https://help.replicated.com/docs/troubleshoot/kubernetes/preflight/overview/\n\n  For application developers writing collectors and analyzers:\n  https://help.replicated.com/docs/troubleshoot/kubernetes/collectors/defining-collectors/\n",
+          "homepage": "https://github.com/replicatedhq/troubleshoot"
+        }
+      },
+      {
+        "kind": "Plugin",
+        "apiVersion": "krew.googlecontainertools.github.com/v1alpha2",
+        "metadata": {
+          "name": "profefe",
+          "creationTimestamp": null
+        },
+        "spec": {
+          "version": "v0.9.0",
+          "shortDescription": "Gather and manage pprof profiles from running pods",
+          "description": "This plugin helps to manage pprof profiles via Profefe. It allows to\ncollect profiles from running pods with Profefe and retrieve or inspect\nprofiles stored in Profefe. For more information about Profefe, visit\nhttps://profefe.dev\n",
+          "homepage": "https://github.com/profefe/kube-profefe"
+        }
+      },
+      {
+        "kind": "Plugin",
+        "apiVersion": "krew.googlecontainertools.github.com/v1alpha2",
+        "metadata": {
+          "name": "prompt",
+          "creationTimestamp": null
+        },
+        "spec": {
+          "version": "v1.0.3-krew",
+          "shortDescription": "Prompts for user confirmation when executing commands in critical namespaces or clusters, i.e., production.",
+          "description": "Protect your production environments!\nWhen issuing certain commands inside a specified namespace/cluster, a warning prompt will appear.\nThis will alert the user that they are in a flagged environment and require a confirmation before executing the command.\nSee `https://github.com/jordanwilson230/kubectl-plugins#kubectl-prompt` for documentation.\nUsage:\n    View description)            kubectl prompt\n    Flag a namespace)            kubectl prompt add -n production\n    Flag a cluster)              kubectl prompt add -c my-production-cluster\n    View flagged environments)   kubectl prompt list\n",
+          "caveats": "This plugin requires bash.\nWhen removing this plugin, delete the line beginning with `function kubectl()` and `KUBECTL_*_PROMPT` in your ~/.bash_profile.\nSee `https://github.com/jordanwilson230/kubectl-plugins#kubectl-prompt` for documentation.\n",
+          "homepage": "https://github.com/jordanwilson230/kubectl-plugins/tree/krew#kubectl-prompt"
+        }
+      },
+      {
+        "kind": "Plugin",
+        "apiVersion": "krew.googlecontainertools.github.com/v1alpha2",
+        "metadata": {
+          "name": "prune-unused",
+          "creationTimestamp": null
+        },
+        "spec": {
+          "version": "v0.5.1",
+          "shortDescription": "Prune unused resources",
+          "description": "Prune unused configmaps/secret resources from a given namespace. It\nchecks against all resources from mounted volumes, env and envFrom and\nimagePullSecrets.\n",
+          "caveats": "Usage:\n    kubectl prune-unused \u003cconfigmaps|secrets\u003e [options]\n\nOptions:\n    -n, --namespace='': If present, the namespace scope for this CLI request\n    --dry-run: If true, only print the object that would be pruned, without deleting it.\n    -h, --help='': Display this help\n\nRead the documentation at:\n  https://github.com/thecloudnatives/kubectl-plugins\n",
+          "homepage": "https://github.com/thecloudnatives/kubectl-plugins"
+        }
+      },
+      {
+        "kind": "Plugin",
+        "apiVersion": "krew.googlecontainertools.github.com/v1alpha2",
+        "metadata": {
+          "name": "rbac-lookup",
+          "creationTimestamp": null
+        },
+        "spec": {
+          "version": "v0.3.0",
+          "shortDescription": "Reverse lookup for RBAC",
+          "description": "Easily find roles and cluster roles attached to any user, service account, or group name in your Kubernetes cluster.\n",
+          "homepage": "https://github.com/reactiveops/rbac-lookup"
+        }
+      },
+      {
+        "kind": "Plugin",
+        "apiVersion": "krew.googlecontainertools.github.com/v1alpha2",
+        "metadata": {
+          "name": "rbac-view",
+          "creationTimestamp": null
+        },
+        "spec": {
+          "version": "v0.1.0",
+          "shortDescription": "A tool to visualize your RBAC permissions.",
+          "caveats": "Run \"kubectl rbac-view\" to open a browser with an html view of your permissions.\nYou can find documentation at https://github.com/jasonrichardsmith/rbac-view.\n",
+          "homepage": "https://github.com/jasonrichardsmith/rbac-view"
+        }
+      },
+      {
+        "kind": "Plugin",
+        "apiVersion": "krew.googlecontainertools.github.com/v1alpha2",
+        "metadata": {
+          "name": "resource-capacity",
+          "creationTimestamp": null
+        },
+        "spec": {
+          "version": "v0.3.2",
+          "shortDescription": "Provides an overview of resource requests, limits, and utilization",
+          "description": "A simple CLI that provides an overview of the resource requests, limits, and utilization in a Kubernetes cluster.\n",
+          "homepage": "https://github.com/robscott/kube-capacity"
+        }
+      },
+      {
+        "kind": "Plugin",
+        "apiVersion": "krew.googlecontainertools.github.com/v1alpha2",
+        "metadata": {
+          "name": "resource-snapshot",
+          "creationTimestamp": null
+        },
+        "spec": {
+          "version": "v0.1.2",
+          "shortDescription": "Prints a snapshot of nodes, pods and HPAs resource usage",
+          "description": "This plugin takes a snapshot of resources (ie. cpu and memory) usage for \npods, HPAs, deployments without HPA and nodes. Other best configuration \npractices, such as Pod Disruption Budget, probes and etc are also included. \nThis is specialy useful to understand, at scale, what you have configured \nin your cluster. \n\nUsage:\n  kubectl snapshot\n  kubectl snapshot -csv-output \u003cNAME\u003e\n\nOther fine tunning are allowed, to understand more type:\n  kubectl snapshot -h\n\nIn order to do more advanced analysis, we strongly suggested you to save \nthe output in csv files, using the command below, and importing them in \na spreadsheet.\n\n  kubectl snapshot -csv-output \u003cNAME\u003e\n\nFor a suggestion on how to interpret the data see\nhttps://github.com/fbrubbo/kubectl-snapshot/blob/master/README.md#sugestions-on-how-to-interpret-the-data\n",
+          "homepage": "https://github.com/fbrubbo/kubectl-snapshot"
+        }
+      },
+      {
+        "kind": "Plugin",
+        "apiVersion": "krew.googlecontainertools.github.com/v1alpha2",
+        "metadata": {
+          "name": "restart",
+          "creationTimestamp": null
+        },
+        "spec": {
+          "version": "v0.0.1",
+          "shortDescription": "Restarts a pod with the given name",
+          "description": "Restarts a pod with the given name. The existing pod\nwill be deleted and created again, not a true restart.\n",
+          "homepage": "https://github.com/achanda/kubectl-restart"
+        }
+      },
+      {
+        "kind": "Plugin",
+        "apiVersion": "krew.googlecontainertools.github.com/v1alpha2",
+        "metadata": {
+          "name": "rm-standalone-pods",
+          "creationTimestamp": null
+        },
+        "spec": {
+          "version": "v0.0.0",
+          "shortDescription": "Remove all pods without owner references",
+          "caveats": "This plugin needs the following programs:\n* jq\n",
+          "homepage": "https://github.com/ahmetb/kubectl-extras"
+        }
+      },
+      {
+        "kind": "Plugin",
+        "apiVersion": "krew.googlecontainertools.github.com/v1alpha2",
+        "metadata": {
+          "name": "snap",
+          "creationTimestamp": null
+        },
+        "spec": {
+          "version": "v0.1.0",
+          "shortDescription": "Delete half of the pods in a namespace or cluster",
+          "description": "This plugin will delete half of the pods in a namespace or the whole \ncluster. It is indiscriminate and may delete all pods under a deployment.\n\nRestore balance to your cluster at the speed of a snap.\n",
+          "caveats": "To reiterate: This will delete half of the pods within the designated space. \n\nCurrently, if there are pods that have failed or completed, they may get \ndeleted and you may lose debug/log data. \n\nDocumentation:\n\n  See https://github.com/honk-ci/kubectl-snap or\n\n  $ kubectl snap -h\n",
+          "homepage": "https://github.com/honk-ci/kubectl-snap"
+        }
+      },
+      {
+        "kind": "Plugin",
+        "apiVersion": "krew.googlecontainertools.github.com/v1alpha2",
+        "metadata": {
+          "name": "sniff",
+          "creationTimestamp": null
+        },
+        "spec": {
+          "version": "v1.3.6",
+          "shortDescription": "Start a remote packet capture on pods using tcpdump and wireshark",
+          "description": "When working with micro-services, many times it's very helpful to get a capture of the network\nactivity between your micro-service and it's dependencies.\n\nksniff use kubectl to upload a statically compiled tcpdump binary to your pod and redirecting it's\noutput to your local Wireshark for smooth network debugging experience.\n",
+          "caveats": "This plugin needs the following programs:\n* wireshark (optional, used for live capture)\n",
+          "homepage": "https://github.com/eldadru/ksniff"
+        }
+      },
+      {
+        "kind": "Plugin",
+        "apiVersion": "krew.googlecontainertools.github.com/v1alpha2",
+        "metadata": {
+          "name": "sort-manifests",
+          "creationTimestamp": null
+        },
+        "spec": {
+          "version": "v0.3.0",
+          "shortDescription": "Sort manifest files in a proper order by Kind",
+          "description": "When installing manifests, they should be sorted in a proper order by Kind.\nFor example, Namespace object must be in the first place when installing\nthem.\n\nksort sorts manifest files in a proper order by Kind, which is implementd by\nusing tiller.SortByKind() in Kubernetes Helm.\n",
+          "homepage": "https://github.com/superbrothers/ksort"
+        }
+      },
+      {
+        "kind": "Plugin",
+        "apiVersion": "krew.googlecontainertools.github.com/v1alpha2",
+        "metadata": {
+          "name": "spy",
+          "creationTimestamp": null
+        },
+        "spec": {
+          "version": "v0.3.3",
+          "shortDescription": "pod debugging tool for kubernetes clusters with docker runtimes",
+          "description": "`kubespy` is a kubectl plugin implemented in bash to debug a running pod.\nIt starts a temporary `spy container` which joins the namespaces of the\ntarget container (eg. pid/net/ipc). You can specify the image of `spy\ncontainer` which should include all the required debugging tools. Thus,\nthe debugging tools need not unnecessarily be bundled with the main\napplication container image.\n\n`kubespy` is similar to [kubectl-debug](https://github.com/verb/kubectl-debug).\nIn contrast to the latter, kubespy works without the EphemeralContainers\nfeature which is an experimental alpha feature and needs to be activated\nper pod.\n\nMeanwhile `kubespy` has its prerequisites - the cluster must use docker as\ncontainer runtime and you need to be able to run privileged pods.\n\nUsage:\n  kubectl spy POD [-c CONTAINER] [-n NAMESPACE] [--spy-image SPY_IMAGE]\n",
+          "caveats": "This plugin can only work with nodes with a docker runtime with admin\nprivileges and you need to be able to run privileged pods.\n",
+          "homepage": "https://github.com/huazhihao/kubespy"
+        }
+      },
+      {
+        "kind": "Plugin",
+        "apiVersion": "krew.googlecontainertools.github.com/v1alpha2",
+        "metadata": {
+          "name": "ssh-jump",
+          "creationTimestamp": null
+        },
+        "spec": {
+          "version": "v0.2.0",
+          "shortDescription": "A kubectl plugin to SSH into Kubernetes nodes using a SSH jump host Pod",
+          "description": "A kubectl plugin to SSH into Kubernetes nodes using a SSH jump host Pod.\nA jump host Pod is an intermediary Pod or an SSH gateway to Kubernetes\nnode machines, through which a connection can be made to the node machines.\n",
+          "caveats": "This plugin needs the following programs:\n* ssh(1)\n* ssh-agent(1)\n\nPlease follow the documentation: https://github.com/yokawasa/kubectl-plugin-ssh-jump\n",
+          "homepage": "https://github.com/yokawasa/kubectl-plugin-ssh-jump"
+        }
+      },
+      {
+        "kind": "Plugin",
+        "apiVersion": "krew.googlecontainertools.github.com/v1alpha2",
+        "metadata": {
+          "name": "sshd",
+          "creationTimestamp": null
+        },
+        "spec": {
+          "version": "v0.1.0",
+          "shortDescription": "Run SSH server in a Pod",
+          "description": "This plugin allows users to run a SSH server (Dropbear) in a running Pod.\nRunning a temporary SSH server can be useful to execute applications\nthat rely on SSH as a protocol, such as scp, rsync and rdiff-backup.\nHowever, this plugin should not be used as a replacement for `kubectl exec`\nand `kubectl cp`.\n",
+          "caveats": "This plugin requires that the 'tar' binary to be present in your container.\n",
+          "homepage": "https://github.com/ottoyiu/kubectl-sshd"
+        }
+      },
+      {
+        "kind": "Plugin",
+        "apiVersion": "krew.googlecontainertools.github.com/v1alpha2",
+        "metadata": {
+          "name": "ssm-secret",
+          "creationTimestamp": null
+        },
+        "spec": {
+          "version": "v1.2.2",
+          "shortDescription": "Import/export secrets from/to AWS SSM param store",
+          "description": "This plugin can import (create/update) a kubernetes secret with key/values \npairs stored at a single AWS SSM parameter store path. It can also export\nkubernetes secret data to an AWS SSM parameter store path. Finally, it can\nlist secret keys/value pairs within a kubernetes secret or at an AWS SSM\nParameter Store path.\n",
+          "caveats": "Read the documentation at https://github.com/pr8kerl/kubectl-ssm-secret.\nYou can call this plugin with \"kubectl ssm-secret --help\".\n",
+          "homepage": "https://github.com/pr8kerl/kubectl-ssm-secret"
+        }
+      },
+      {
+        "kind": "Plugin",
+        "apiVersion": "krew.googlecontainertools.github.com/v1alpha2",
+        "metadata": {
+          "name": "sudo",
+          "creationTimestamp": null
+        },
+        "spec": {
+          "version": "v1.0.1",
+          "shortDescription": "Run Kubernetes commands impersonated as group system:masters",
+          "description": "This plugin wraps kubectl commands to impersonate as user $USER and group system:masters.\n",
+          "caveats": "Follow https://github.com/postfinance/kubectl-sudo/blob/master/README.md\nin order to configure your Kubernetes cluster to allow impersonations.\n",
+          "homepage": "https://github.com/postfinance/kubectl-sudo"
+        }
+      },
+      {
+        "kind": "Plugin",
+        "apiVersion": "krew.googlecontainertools.github.com/v1alpha2",
+        "metadata": {
+          "name": "support-bundle",
+          "creationTimestamp": null
+        },
+        "spec": {
+          "version": "v0.9.21",
+          "shortDescription": "Creates support bundles for off-cluster analysis",
+          "description": "This plugin collects information about the cluster, and automatically\nredacts sensitive data from being collected. This can optionally include\napplication-specific data.  The plugin writes the collected files into a\nsingle archive named support-bundle.tar.gz. This archive can be manually\ninspected or uploaded to https://vendor.replicated.com for automated\nanalysis.\n\nApplication developers can create and host a Collector manifest that\ndefines information to be collected.\n\nFor information on creating a Collector manifest, view the documentation\nat https://help.replicated.com/docs/troubleshoot/kubernetes/collectors/defining-collectors/\n",
+          "caveats": "Usage:\n  $ kubectl support-bundle \u003curi\u003e\n\n  where \u003curi\u003e references a set of application collectors\n\n  For example:\n\n  $ kubectl support-bundle https://troubleshoot.replicated.com\n\nFor additional options:\n  $ kubectl support-bundle --help\n\nDocumentation:\n  Full documentation on this plugin is available at:\n  https://help.replicated.com/docs/troubleshoot/kubernetes/support-bundle/overview/\n\n  For application developers writing collectors and analyzers:\n  https://help.replicated.com/docs/troubleshoot/kubernetes/collectors/defining-collectors/\n",
+          "homepage": "https://github.com/replicatedhq/troubleshoot"
+        }
+      },
+      {
+        "kind": "Plugin",
+        "apiVersion": "krew.googlecontainertools.github.com/v1alpha2",
+        "metadata": {
+          "name": "tail",
+          "creationTimestamp": null
+        },
+        "spec": {
+          "version": "v0.10.1",
+          "shortDescription": "Stream logs from multiple pods and containers using simple, dynamic source selection.",
+          "description": "-| Kail https://github.com/boz/kail - \"Just show me the logs\"\nStream logs from all matched containers of all matched pods.  Match pods by service, replicaset, deployment, and others.  Adjusts to a changing cluster - pods are added and removed from logging as they fall in or out of the selection.",
+          "caveats": "Documentation:\n\n  See https://github.com/boz/kail or\n\n  $ kubectl tail --help\n\nUsage:\n\n  # match all pods\n  $ kubectl tail\n\n  # match pods in the 'frontend' namespace\n  $ kubectl tail --ns staging\n\n  # match pods belonging to a replicaset named 'workers' in any namespace.\n  $ kubectl tail --rs workers\n\n  # match pods belonging to the replicaset named 'workers' only in the 'staging' namespace\n  $ kubectl tail --rs staging/workers\n\n  # match pods belonging to both the service \"frontend\" and the deployment \"webapp\"\n  $ kubectl tail --svc frontend --deploy webapp\n",
+          "homepage": "https://github.com/boz/kail"
+        }
+      },
+      {
+        "kind": "Plugin",
+        "apiVersion": "krew.googlecontainertools.github.com/v1alpha2",
+        "metadata": {
+          "name": "tree",
+          "creationTimestamp": null
+        },
+        "spec": {
+          "version": "v0.4.0",
+          "shortDescription": "Show a tree of object hierarchies through ownerReferences",
+          "description": "This plugin shows sub-resources of a specified Kubernetes API object in a\ntree view in the command-line. The parent-child relationship is discovered\nusing ownerReferences on the child object.\n",
+          "caveats": "* For resources that are not in default namespace, currently you must\n  specify -n/--namespace explicitly (the current namespace setting is not\n  yet used).\n",
+          "homepage": "https://github.com/ahmetb/kubectl-tree"
+        }
+      },
+      {
+        "kind": "Plugin",
+        "apiVersion": "krew.googlecontainertools.github.com/v1alpha2",
+        "metadata": {
+          "name": "view-allocations",
+          "creationTimestamp": null
+        },
+        "spec": {
+          "version": "v0.6.2",
+          "shortDescription": "List allocations per resources, nodes, pods.",
+          "description": "This plugin lists resources (cpu, memory, gpu,...) allocations (requested,\nlimit, allocatable) as defined into the manifest of nodes and running pods.\ntry `kubectl view-allocations -h`, `kubectl view-allocations`\n",
+          "homepage": "https://github.com/davidB/kubectl-view-allocations"
+        }
+      },
+      {
+        "kind": "Plugin",
+        "apiVersion": "krew.googlecontainertools.github.com/v1alpha2",
+        "metadata": {
+          "name": "view-secret",
+          "creationTimestamp": null
+        },
+        "spec": {
+          "version": "v0.4.0",
+          "shortDescription": "Decode Kubernetes secrets",
+          "description": "Base64 decode by key or all key/value pairs in a given secret.\n\n# print secret keys\n$ kubectl view-secret \u003csecret\u003e\n\n# decode specific entry\n$ kubectl view-secret \u003csecret\u003e \u003ckey\u003e\n\n# decode all secret contents\n$ kubectl view-secret \u003csecret\u003e -a/--all\n\n# print keys for secret in different namespace\n$ kubectl view-secret \u003csecret\u003e -n/--namespace foo\n\n# print keys for secret in different context\n$ kubectl view-secret \u003csecret\u003e -c/--context ctx\n\n# suppress info output\n$ kubectl view-secret \u003csecret\u003e -q/--quiet\n",
+          "homepage": "https://github.com/elsesiy/kubectl-view-secret"
+        }
+      },
+      {
+        "kind": "Plugin",
+        "apiVersion": "krew.googlecontainertools.github.com/v1alpha2",
+        "metadata": {
+          "name": "view-serviceaccount-kubeconfig",
+          "creationTimestamp": null
+        },
+        "spec": {
+          "version": "v2.1.1",
+          "shortDescription": "Show a kubeconfig setting to access the apiserver with a specified serviceaccount.",
+          "description": "Show a kubeconfig setting to access the apiserver with a specified serviceaccount.",
+          "homepage": "https://github.com/superbrothers/kubectl-view-serviceaccount-kubeconfig-plugin"
+        }
+      },
+      {
+        "kind": "Plugin",
+        "apiVersion": "krew.googlecontainertools.github.com/v1alpha2",
+        "metadata": {
+          "name": "view-utilization",
+          "creationTimestamp": null
+        },
+        "spec": {
+          "version": "v0.3.2",
+          "shortDescription": "Shows cluster cpu and memory utilization",
+          "description": "This plugin shows cluster resource utilization based on cpu and memory. It collects pod requests and node available resources to calculate metrics.\n",
+          "caveats": "This plugin needs the following programs:\n* bash\n* awk (gawk,mawk,awk)\n",
+          "homepage": "https://github.com/etopeter/kubectl-view-utilization"
+        }
+      },
+      {
+        "kind": "Plugin",
+        "apiVersion": "krew.googlecontainertools.github.com/v1alpha2",
+        "metadata": {
+          "name": "virt",
+          "creationTimestamp": null
+        },
+        "spec": {
+          "version": "v0.25.0",
+          "shortDescription": "Control KubeVirt virtual machines using virtctl",
+          "description": "virt plugin is a wrapper for virtctl originating from the KubeVirt project. KubeVirt is a virtualization add-on to\nKubernetes, i.e. it enables to run existing virtual machines on Kubernetes clusters. virtctl controls virtual\nmachine related operations on your Kubernetes cluster like connecting to the serial and VNC consoles.\n\nKubevirt documentation:\n  Overview:\n    https://kubevirt.io/\n  Installation:\n    https://kubevirt.io/user-guide/docs/latest/administration/intro.html\n  User Guide:\n    https://kubevirt.io/user-guide/docs/latest/welcome/index.html\n  Minikube Quickstart:\n    https://kubevirt.io/quickstart_minikube/\n  Virtctl usage examples:\n    https://kubevirt.io/user-guide/docs/latest/using-virtual-machines/graphical-and-console-access.html\n    https://kubevirt.io/user-guide/docs/latest/using-virtual-machines/expose-service.html\n    https://kubevirt.io/user-guide/docs/latest/using-virtual-machines/virtual-machine-replica-set.html\n",
+          "caveats": "virt plugin is a wrapper for virtctl originating from the KubeVirt project. In order to use virtctl you will\nneed to have KubeVirt installed on your Kubernetes cluster to use it. See https://kubevirt.io/ for details\n\nRun\n\n  kubectl virt help\n\nto get an overview of the available commands\n\nSee\n\n  https://kubevirt.io/user-guide/docs/latest/using-virtual-machines/graphical-and-console-access.html\n\nfor a usage example\n",
+          "homepage": "https://kubevirt.io"
+        }
+      },
+      {
+        "kind": "Plugin",
+        "apiVersion": "krew.googlecontainertools.github.com/v1alpha2",
+        "metadata": {
+          "name": "warp",
+          "creationTimestamp": null
+        },
+        "spec": {
+          "version": "v0.0.2",
+          "shortDescription": "Sync and execute local files in Pod",
+          "description": "This plugin is like `kubectl run` with `rsync`.\nIt creates temporary Pod and synchronises your local files to\nthe desired container and executes any command.\n",
+          "caveats": "Read the documentation: https://github.com/ernoaapa/kubectl-warp\n\nThis plugin needs the following programs:\n* rsync\n",
+          "homepage": "https://github.com/ernoaapa/kubectl-warp"
+        }
+      },
+      {
+        "kind": "Plugin",
+        "apiVersion": "krew.googlecontainertools.github.com/v1alpha2",
+        "metadata": {
+          "name": "who-can",
+          "creationTimestamp": null
+        },
+        "spec": {
+          "version": "v0.1.0-beta.2",
+          "shortDescription": "Shows who has RBAC permissions to access Kubernetes resources",
+          "description": "Shows which subjects have RBAC permissions to VERB [TYPE | TYPE/NAME | NONRESOURCEURL]\n\nVERB is a logical Kubernetes API verb like 'get', 'list', 'watch', 'delete', etc.\nTYPE is a Kubernetes resource. Shortcuts and API groups will be resolved, e.g. 'po' or 'pod.metrics.k8s.io'.\nNAME is the name of a particular Kubernetes resource.\nNONRESOURCEURL is a partial URL that starts with \"/\".\n\nFor example, if you want to find all subjects who have permission to\ndelete pods in a particular namespace, or to delete nodes in the cluster\n(dangerous!) you could run the following commands:\n\n$ kubectl who-can delete pods --namespace foo\n$ kubectl who-can delete nodes\n",
+          "caveats": "The plugin requires the rights to list (Cluster)Role and (Cluster)RoleBindings.\n\nFor usage or examples, run:\n\n$ kubectl who-can -h\n",
+          "homepage": "https://github.com/aquasecurity/kubectl-who-can"
+        }
+      },
+      {
+        "kind": "Plugin",
+        "apiVersion": "krew.googlecontainertools.github.com/v1alpha2",
+        "metadata": {
+          "name": "whoami",
+          "creationTimestamp": null
+        },
+        "spec": {
+          "version": "v0.0.31",
+          "shortDescription": "Show the subject that's currently authenticated as.",
+          "description": "This plugin show the subject that's currently authenticated as.\n",
+          "caveats": "This plugin has only been tested with RBAC token, ServiceAccount token, and BasicAuth. \n\nIt will be great if we can get volunteers to test it with other Auth providers.\n\nRead the documentation at:\n  https://github.com/rajatjindal/kubectl-whoami\n",
+          "homepage": "https://github.com/rajatjindal/kubectl-whoami"
+        }
+      }
+    ]
+  }
+}
