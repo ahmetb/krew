@@ -1,16 +1,19 @@
 package main
 
 import (
+	"context"
 	"encoding/json"
 	"flag"
 	"fmt"
 	"io"
 	"log"
 	"net/http"
+	"os"
 	"strings"
 
 	"github.com/apex/gateway"
 	"github.com/google/go-github/v32/github"
+	"golang.org/x/oauth2"
 )
 
 const (
@@ -27,10 +30,18 @@ type PluginCountResponse struct {
 	// TODO add error
 }
 
+func githubClient(ctx context.Context) *github.Client {
+	var hc *http.Client
+	if v := os.Getenv("GITHUB_ACCESS_TOKEN"); v != "" {
+		ts := oauth2.StaticTokenSource(&oauth2.Token{AccessToken: v})
+		hc = oauth2.NewClient(ctx, ts)
+	}
+	return github.NewClient(hc)
+}
+
 func pluginCountHandler(w http.ResponseWriter, req *http.Request) {
-	gh := github.NewClient(nil)
-	_, dir, resp, err := gh.Repositories.GetContents(req.Context(), orgName, repoName, pluginsDir,
-		&github.RepositoryContentGetOptions{})
+	_, dir, resp, err := githubClient(req.Context()).
+		Repositories.GetContents(req.Context(), orgName, repoName, pluginsDir, &github.RepositoryContentGetOptions{})
 	if err != nil {
 		w.WriteHeader(http.StatusInternalServerError)
 		fmt.Fprintf(w, "error retrieving repo contents: %v", err) // JSON error
@@ -71,7 +82,7 @@ func main() {
 	port := flag.Int("port", -1, "specify a port to use http rather than AWS Lambda")
 	flag.Parse()
 
-	http.HandleFunc("/", pluginCountHandler)
+	http.HandleFunc("/pc", pluginCountHandler)
 	if *port == -1 {
 		log.Fatal(gateway.ListenAndServe("n/a", nil))
 	}
