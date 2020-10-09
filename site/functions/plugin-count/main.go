@@ -141,7 +141,7 @@ func pluginsHandler(w http.ResponseWriter, req *http.Request) {
 			Name:             v.Name,
 			Homepage:         v.Spec.Homepage,
 			ShortDescription: v.Spec.ShortDescription,
-			GitHubRepo:       findRepo(v.Spec.Homepage),
+			GithubRepo:       findRepo(v.Spec.Homepage),
 		}
 		out.Data.Plugins = append(out.Data.Plugins, pi)
 	}
