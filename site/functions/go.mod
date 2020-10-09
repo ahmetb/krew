@@ -10,7 +10,7 @@ require (
 	golang.org/x/oauth2 v0.0.0-20180821212333-d2e6202438be
 	gopkg.in/yaml.v2 v2.2.8
 	sigs.k8s.io/krew v0.4.0
-	sigs.k8s.io/yaml v1.2.0 // indirect
+	sigs.k8s.io/yaml v1.2.0
 )
 
 // replace sigs.k8s.io/krew => ../../

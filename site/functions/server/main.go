@@ -1,3 +1,16 @@
+// Copyright 2020 The Kubernetes Authors.
+//
+// Licensed under the Apache License, Version 2.0 (the "License");
+// you may not use this file except in compliance with the License.
+// You may obtain a copy of the License at
+//
+//      http://www.apache.org/licenses/LICENSE-2.0
+//
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+// See the License for the specific language governing permissions and
+// limitations under the License.
 package main
 
 import (
@@ -6,8 +19,11 @@ import (
 	"flag"
 	"fmt"
 	"io"
+	"io/ioutil"
 	"log"
 	"net/http"
+	"net/http/httputil"
+	"net/url"
 	"os"
 	"regexp"
 	"strings"
@@ -17,8 +33,8 @@ import (
 	"github.com/apex/gateway"
 	"github.com/google/go-github/v32/github"
 	"golang.org/x/oauth2"
-	"gopkg.in/yaml.v2"
 	krew "sigs.k8s.io/krew/pkg/index"
+	"sigs.k8s.io/yaml"
 )
 
 const (
@@ -27,6 +43,7 @@ const (
 	pluginsDir = "plugins"
 
 	urlFetchBatchSize = 40
+	cacheSeconds      = 60 * 60
 )
 
 var (
@@ -37,18 +54,18 @@ type PluginCountResponse struct {
 	Data struct {
 		Count int `json:"count"`
 	} `json:"data"`
-	Error ErrorResponse `json:"error"`
+	Error ErrorResponse `json:"error,omitempty"`
 }
 
 type pluginInfo struct {
-	Name             string `json:"name"`
+	Name             string `json:"name,omitempty"`
 	Homepage         string `json:"homepage,omitempty"`
 	ShortDescription string `json:"short_description,omitempty"`
 	GithubRepo       string `json:"github_repo,omitempty"`
 }
 
 type ErrorResponse struct {
-	Message string `json:"message"`
+	Message string `json:"message,omitempty"`
 }
 
 type PluginsResponse struct {
@@ -60,6 +77,10 @@ type PluginsResponse struct {
 
 func githubClient(ctx context.Context) *github.Client {
 	var hc *http.Client
+
+	// if not configured, you should configure a GITHUB_ACCESS_TOKEN
+	// variable on Netlify dashboard for the site. You can create a
+	// permission-less "personal access token" on GitHub account settings.
 	if v := os.Getenv("GITHUB_ACCESS_TOKEN"); v != "" {
 		ts := oauth2.StaticTokenSource(&oauth2.Token{AccessToken: v})
 		hc = oauth2.NewClient(ctx, ts)
@@ -82,6 +103,8 @@ func pluginCountHandler(w http.ResponseWriter, req *http.Request) {
 
 	var out PluginCountResponse
 	out.Data.Count = count
+
+	w.Header().Set("Cache-Control", fmt.Sprintf("public, max-age=%d", cacheSeconds))
 	writeJSON(w, out)
 }
 
@@ -137,6 +160,7 @@ func pluginsHandler(w http.ResponseWriter, req *http.Request) {
 	}
 
 	for _, v := range plugins {
+		log.Printf("short description: %#v", v.Spec)
 		pi := pluginInfo{
 			Name:             v.Name,
 			Homepage:         v.Spec.Homepage,
@@ -146,6 +170,7 @@ func pluginsHandler(w http.ResponseWriter, req *http.Request) {
 		out.Data.Plugins = append(out.Data.Plugins, pi)
 	}
 
+	w.Header().Set("Cache-Control", fmt.Sprintf("public, max-age=%d", cacheSeconds))
 	writeJSON(w, out)
 }
 
@@ -195,7 +220,6 @@ func fetchPlugins(entries []*github.RepositoryContent) ([]*krew.Plugin, error) {
 		case <-ctx.Done():
 			break
 		case queue <- url:
-			log.Printf("queued %s", url)
 		}
 	}
 
@@ -213,11 +237,17 @@ func readPlugin(url string) (*krew.Plugin, error) {
 	if resp.Body != nil {
 		defer resp.Body.Close()
 	}
-	var v *krew.Plugin
-	if err = yaml.NewDecoder(resp.Body).Decode(&v); err != nil {
+	var v krew.Plugin
+
+	b, err := ioutil.ReadAll(resp.Body)
+	if err != nil {
+		return nil, fmt.Errorf("failed to read file %s: %w", url, err)
+	}
+
+	if err = yaml.Unmarshal(b, &v); err != nil {
 		return nil, fmt.Errorf("failed to parse plugin manifest for %s: %w", url, err)
 	}
-	return v, nil
+	return &v, nil
 }
 
 func findRepo(homePage string) string {
@@ -244,6 +274,8 @@ func main() {
 	mux := http.NewServeMux()
 	mux.HandleFunc("/.netlify/functions/api/pluginCount", pluginCountHandler)
 	mux.HandleFunc("/.netlify/functions/api/plugins", pluginsHandler)
+	// To debug locally, you can run this server with -port=:8080 and run "hugo serve" and uncomment this:
+	mux.Handle("/", httputil.NewSingleHostReverseProxy(&url.URL{Scheme: "http", Host: "localhost:1313"}))
 
 	handler := loggingHandler(mux)
 	if *port == -1 {
