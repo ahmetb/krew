@@ -13,4 +13,4 @@ require (
 	sigs.k8s.io/yaml v1.2.0 // indirect
 )
 
-replace sigs.k8s.io/krew => ../../
+# replace sigs.k8s.io/krew => ../../
