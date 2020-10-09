@@ -1,7 +1,7 @@
 [build]
 base = "site/"
 publish = "public/"
-command = "hugo && cd ./site/functions && go build -o hello hello.go"
+command = "hugo && cd ./functions && go build -o hello hello.go"
 functions = "functions/"
 
 [build.environment]
