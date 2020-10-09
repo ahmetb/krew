@@ -74,6 +74,6 @@ func main() {
 	if *port == -1 {
 		log.Fatal(gateway.ListenAndServe("n/a", nil))
 	}
-	http.HandleFunc("/", pluginCountHandler)
+	http.HandleFunc("/.netlify/functions/api", pluginCountHandler)
 	log.Fatal(http.ListenAndServe(fmt.Sprintf(":%d", *port), nil))
 }
