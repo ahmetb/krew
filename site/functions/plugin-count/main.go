@@ -71,9 +71,9 @@ func main() {
 	port := flag.Int("port", -1, "specify a port to use http rather than AWS Lambda")
 	flag.Parse()
 
+	http.HandleFunc("/", pluginCountHandler)
 	if *port == -1 {
 		log.Fatal(gateway.ListenAndServe("n/a", nil))
 	}
-	http.HandleFunc("/.netlify/functions/api", pluginCountHandler)
 	log.Fatal(http.ListenAndServe(fmt.Sprintf(":%d", *port), nil))
 }
